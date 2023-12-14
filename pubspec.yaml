@@ -1,0 +1,30 @@
+name: chattie
+version: 1.0.0+1
+publish_to: none
+description: A new Flutter project.
+environment: 
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies: 
+  cupertino_icons: ^1.0.2
+  get: 4.6.6
+  google_fonts: 6.1.0
+  firebase_core: 2.24.2
+  firebase_auth: 4.15.3
+  google_sign_in: 6.2.1
+  lottie: 2.7.0
+  flutter: 
+    sdk: flutter
+
+dev_dependencies: 
+  flutter_lints: 3.0.1
+  flutter_test: 
+    sdk: flutter
+
+flutter: 
+  assets: 
+    - assets/logo/
+    - assets/lottie/
+    - assets/models/
+  uses-material-design: true
+
