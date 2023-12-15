@@ -9,7 +9,9 @@ class LoadingScreen extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: Colors.blue,
+          ),
         ),
       ),
     );

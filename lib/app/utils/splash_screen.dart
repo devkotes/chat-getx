@@ -7,13 +7,14 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double size = context.width * 0.75;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
           child: SizedBox(
-            width: Get.width * 0.75,
-            height: Get.width * 0.75,
+            width: size,
+            height: size,
             child: Lottie.asset('assets/lottie/hello.json'),
           ),
         ),

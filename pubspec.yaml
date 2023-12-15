@@ -13,6 +13,9 @@ dependencies:
   firebase_auth: 4.15.3
   google_sign_in: 6.2.1
   lottie: 2.7.0
+  introduction_screen: 3.1.12
+  avatar_glow: 3.0.1
+  emoji_picker_flutter: 1.6.3
   flutter: 
     sdk: flutter
 
