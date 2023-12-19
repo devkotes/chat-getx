@@ -55,12 +55,12 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.UPDATE_STATUS,
-      page: () => const UpdateStatusView(),
+      page: () => UpdateStatusView(),
       binding: UpdateStatusBinding(),
     ),
     GetPage(
       name: _Paths.CHANGE_PROFILE,
-      page: () => const ChangeProfileView(),
+      page: () => ChangeProfileView(),
       binding: ChangeProfileBinding(),
     ),
   ];

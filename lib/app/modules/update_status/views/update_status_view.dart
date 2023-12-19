@@ -1,3 +1,4 @@
+import 'package:chattie/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -5,9 +6,13 @@ import 'package:get/get.dart';
 import '../controllers/update_status_controller.dart';
 
 class UpdateStatusView extends GetView<UpdateStatusController> {
-  const UpdateStatusView({super.key});
+  UpdateStatusView({super.key});
+
+  final authC = Get.find<AuthController>();
+
   @override
   Widget build(BuildContext context) {
+    controller.statusC.text = authC.user.value.status!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[300],
@@ -29,8 +34,12 @@ class UpdateStatusView extends GetView<UpdateStatusController> {
         child: Column(
           children: [
             TextField(
+              controller: controller.statusC,
               style: const TextStyle(fontSize: 13),
               cursorColor: Colors.black,
+              onEditingComplete: () {
+                authC.changeStatus(status: controller.statusC.text);
+              },
               decoration: InputDecoration(
                 labelText: 'Status',
                 contentPadding:
@@ -55,7 +64,8 @@ class UpdateStatusView extends GetView<UpdateStatusController> {
             SizedBox(
               width: Get.width,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () =>
+                    authC.changeStatus(status: controller.statusC.text),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[300],
                   padding:

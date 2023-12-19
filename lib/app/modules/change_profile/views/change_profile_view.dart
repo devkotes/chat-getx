@@ -3,12 +3,19 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
+import '../../../controllers/auth_controller.dart';
 import '../controllers/change_profile_controller.dart';
 
 class ChangeProfileView extends GetView<ChangeProfileController> {
-  const ChangeProfileView({super.key});
+  ChangeProfileView({super.key});
+  final authC = Get.find<AuthController>();
+
   @override
   Widget build(BuildContext context) {
+    controller.emailC.text = authC.user.value.email!;
+    controller.nameC.text = authC.user.value.name!;
+    controller.statusC.text = authC.user.value.status!;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[300],
@@ -26,7 +33,10 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => authC.changeProfile(
+              name: controller.nameC.text,
+              status: controller.statusC.text,
+            ),
             icon: const Icon(
               Icons.save_alt_sharp,
               color: Colors.white,
@@ -39,19 +49,24 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              AvatarGlow(
-                glowRadiusFactor: 0.1,
-                glowColor: Colors.grey,
-                duration: const Duration(seconds: 3),
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: const BoxDecoration(
-                    color: Colors.black38,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: AssetImage('assets/logo/noimage.png'),
-                      fit: BoxFit.cover,
+              Obx(
+                () => AvatarGlow(
+                  glowRadiusFactor: 0.1,
+                  glowColor: Colors.grey,
+                  duration: const Duration(seconds: 3),
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: (authC.user.value.photoUrl != null)
+                            ? NetworkImage(authC.user.value.photoUrl!)
+                                as ImageProvider
+                            : const AssetImage('assets/logo/noimage.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -60,6 +75,7 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
                 height: 20,
               ),
               TextField(
+                readOnly: true,
                 controller: controller.emailC,
                 keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(fontSize: 13),
@@ -89,6 +105,7 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
                 controller: controller.nameC,
                 style: const TextStyle(fontSize: 13),
                 cursorColor: Colors.black,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   labelText: 'Full Name',
                   contentPadding:
@@ -114,6 +131,13 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
                 controller: controller.statusC,
                 style: const TextStyle(fontSize: 13),
                 cursorColor: Colors.black,
+                textInputAction: TextInputAction.done,
+                onEditingComplete: () {
+                  authC.changeProfile(
+                    name: controller.nameC.text,
+                    status: controller.statusC.text,
+                  );
+                },
                 decoration: InputDecoration(
                   labelText: 'Status',
                   contentPadding:
@@ -154,7 +178,10 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
               SizedBox(
                 width: Get.width,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => authC.changeProfile(
+                    name: controller.nameC.text,
+                    status: controller.statusC.text,
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[300],
                     padding: const EdgeInsets.symmetric(

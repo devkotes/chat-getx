@@ -16,6 +16,8 @@ dependencies:
   introduction_screen: 3.1.12
   avatar_glow: 3.0.1
   emoji_picker_flutter: 1.6.3
+  get_storage: 2.1.1
+  cloud_firestore: 4.13.6
   flutter: 
     sdk: flutter
 

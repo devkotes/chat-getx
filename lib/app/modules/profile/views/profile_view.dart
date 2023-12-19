@@ -46,11 +46,14 @@ class ProfileView extends GetView<ProfileController> {
                   // margin: const EdgeInsets.only(bottom: 25),
                   width: 175,
                   height: 175,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Colors.black38,
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: AssetImage('assets/logo/noimage.png'),
+                      image: (authC.user.value.photoUrl != null)
+                          ? NetworkImage(authC.user.value.photoUrl!)
+                              as ImageProvider
+                          : const AssetImage('assets/logo/noimage.png'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -59,16 +62,18 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(
                 height: 20,
               ),
-              const Text(
-                'Dadang Casper',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+              Obx(
+                () => Text(
+                  '${authC.user.value.name}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const Text(
-                'dadangcasper@gmail.com',
-                style: TextStyle(
+              Text(
+                '${authC.user.value.email}',
+                style: const TextStyle(
                   color: Colors.black54,
                 ),
               )

@@ -1,27 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
-  Future<void> createUser({
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> chatStream({
     required String email,
-    required String password,
-  }) async {
-    try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      debugPrint('CREDENTIAL : $credential');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        debugPrint('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        debugPrint('The account already exists for that email.');
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+  }) {
+    return firestore.collection('users').doc(email).snapshots();
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> friendStream({
+    required String email,
+  }) {
+    return firestore.collection('users').doc(email).snapshots();
   }
 }
