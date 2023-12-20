@@ -49,88 +49,94 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              stream: controller.chatStream(email: authC.user.value.email!),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.active) {
-                  var allChats = (snapshot.data!.data()
-                      as Map<String, dynamic>)['chats'] as List;
-                  debugPrint('Data Chat : $allChats');
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(top: 10),
-                    itemCount: allChats.length,
-                    itemBuilder: (context, index) {
-                      return StreamBuilder<
-                          DocumentSnapshot<Map<String, dynamic>>>(
-                        stream: controller.friendStream(
-                            email: allChats[index]['connection']),
-                        builder: (context, snapshotFriend) {
-                          if (snapshotFriend.connectionState ==
-                              ConnectionState.active) {
-                            var data = snapshotFriend.data!.data()!;
-                            return ListTile(
-                              onTap: () => Get.toNamed(Routes.CHAT),
-                              leading: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.black38,
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: (data['photoUrl'] != null)
-                                        ? NetworkImage(data['photoUrl'])
-                                            as ImageProvider
-                                        : const AssetImage(
-                                            'assets/logo/noimage.png'),
-                                    fit: BoxFit.cover,
-                                  ),
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: controller.chatStream(email: authC.user.value.email!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.active) {
+                var listDocsChats = snapshot.data?.docs;
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: listDocsChats?.length,
+                  itemBuilder: (context, index) {
+                    return StreamBuilder<
+                        DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: controller.friendStream(
+                          email: listDocsChats?[index]['connection']),
+                      builder: (context, snapshotFriend) {
+                        if (snapshotFriend.connectionState ==
+                            ConnectionState.active) {
+                          return ListTile(
+                            onTap: () {
+                              controller.goToChat(
+                                chatId: listDocsChats?[index].id,
+                                email: authC.user.value.email!,
+                                friendEmail: listDocsChats?[index]
+                                    ['connection'],
+                              );
+                            },
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.black38,
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: (snapshotFriend.data?['photoUrl'] !=
+                                          null)
+                                      ? NetworkImage(
+                                              snapshotFriend.data?['photoUrl'])
+                                          as ImageProvider
+                                      : const AssetImage(
+                                          'assets/logo/noimage.png'),
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                              title: Text(
-                                '${data["name"]}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            ),
+                            title: Text(
+                              '${snapshotFriend.data?["name"]}',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
                               ),
-                              // subtitle: Text(
-                              //   'Ini Status orang ke ${index + 1}',
-                              //   style: const TextStyle(
-                              //     fontSize: 13,
-                              //   ),
-                              // ),
-                              trailing: (allChats[index]['total_unread'] == 0)
-                                  ? const SizedBox.shrink()
-                                  : Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.blue[600],
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          '${allChats[index]['total_unread']}',
-                                          style: const TextStyle(
-                                              fontSize: 8, color: Colors.white),
+                            ),
+                            subtitle: Text(
+                              '${snapshotFriend.data?["status"]}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                              ),
+                            ),
+                            trailing:
+                                (listDocsChats?[index]['totalUnread'] == 0)
+                                    ? const SizedBox.shrink()
+                                    : Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.blue[600],
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '${listDocsChats?[index]['totalUnread']}',
+                                            style: const TextStyle(
+                                                fontSize: 8,
+                                                color: Colors.white),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                            );
-                          }
-                          return Container();
-                        },
-                      );
-                    },
-                  );
-                }
-
-                return const Center(
-                  child: CircularProgressIndicator(),
+                          );
+                        }
+                        return Container();
+                      },
+                    );
+                  },
                 );
-              },
-            ),
-          )
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
+          ))
         ],
       ),
       floatingActionButton: FloatingActionButton(

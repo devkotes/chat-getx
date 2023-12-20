@@ -36,48 +36,48 @@ class ProfileView extends GetView<ProfileController> {
           const SizedBox(
             height: 30,
           ),
-          Column(
-            children: [
-              AvatarGlow(
-                glowRadiusFactor: 0.1,
-                glowColor: Colors.grey,
-                duration: const Duration(seconds: 3),
-                child: Container(
-                  // margin: const EdgeInsets.only(bottom: 25),
-                  width: 175,
-                  height: 175,
-                  decoration: BoxDecoration(
-                    color: Colors.black38,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: (authC.user.value.photoUrl != null)
-                          ? NetworkImage(authC.user.value.photoUrl!)
-                              as ImageProvider
-                          : const AssetImage('assets/logo/noimage.png'),
-                      fit: BoxFit.cover,
+          Obx(
+            () => Column(
+              children: [
+                AvatarGlow(
+                  glowRadiusFactor: 0.1,
+                  glowColor: Colors.grey,
+                  duration: const Duration(seconds: 3),
+                  child: Container(
+                    // margin: const EdgeInsets.only(bottom: 25),
+                    width: 175,
+                    height: 175,
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: (authC.user.value.photoUrl != null)
+                            ? NetworkImage(authC.user.value.photoUrl!)
+                                as ImageProvider
+                            : const AssetImage('assets/logo/noimage.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Obx(
-                () => Text(
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
                   '${authC.user.value.name}',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              Text(
-                '${authC.user.value.email}',
-                style: const TextStyle(
-                  color: Colors.black54,
-                ),
-              )
-            ],
+                Text(
+                  '${authC.user.value.email}',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                  ),
+                )
+              ],
+            ),
           ),
           const SizedBox(
             height: 20,

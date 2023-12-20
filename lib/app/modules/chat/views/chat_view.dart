@@ -1,13 +1,23 @@
+import 'dart:async';
+
+import 'package:chattie/app/controllers/auth_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../controllers/chat_controller.dart';
 
 class ChatView extends GetView<ChatController> {
-  const ChatView({super.key});
+  ChatView({super.key});
+
+  final authC = Get.find<AuthController>();
+  final chatId = (Get.arguments as Map<String, dynamic>)['chatId'];
+  final friendEmail = (Get.arguments as Map<String, dynamic>)['friendEmail'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,36 +28,79 @@ class ChatView extends GetView<ChatController> {
           onTap: () => Get.back(),
           child: Container(
             margin: const EdgeInsets.only(left: 8),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.arrow_back_ios_new_rounded,
                   color: Colors.white,
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 8,
                 ),
-                CircleAvatar(
-                  backgroundColor: Colors.grey,
-                  backgroundImage: AssetImage('assets/logo/noimage.png'),
+                StreamBuilder<DocumentSnapshot<Object?>>(
+                  stream: controller.streamFriendData(friendEmail: friendEmail),
+                  builder: (context, snapshotFriend) {
+                    if (snapshotFriend.connectionState ==
+                        ConnectionState.active) {
+                      var dataFriend =
+                          snapshotFriend.data!.data() as Map<String, dynamic>;
+                      if (dataFriend['photoUrl'] != null) {
+                        return CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          backgroundImage: NetworkImage(dataFriend['photoUrl']),
+                        );
+                      } else {
+                        return const CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          backgroundImage:
+                              AssetImage('assets/logo/noimage.png'),
+                        );
+                      }
+                    }
+                    return const CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      backgroundImage: AssetImage('assets/logo/noimage.png'),
+                    );
+                  },
                 )
               ],
             ),
           ),
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Kyunzi Permana',
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
-            Text(
-              'online',
-              style: TextStyle(fontSize: 12, color: Colors.white),
-            ),
-          ],
-        ),
+        title: StreamBuilder<DocumentSnapshot<Object?>>(
+            stream: controller.streamFriendData(friendEmail: friendEmail),
+            builder: (context, snapshotFriend) {
+              if (snapshotFriend.connectionState == ConnectionState.active) {
+                var dataFriend =
+                    snapshotFriend.data!.data() as Map<String, dynamic>;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dataFriend['name'],
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    Text(
+                      dataFriend['status'],
+                      style: const TextStyle(fontSize: 12, color: Colors.white),
+                    ),
+                  ],
+                );
+              }
+              return const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'loading ...',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                  Text(
+                    'loading ...',
+                    style: TextStyle(fontSize: 12, color: Colors.white),
+                  ),
+                ],
+              );
+            }),
         centerTitle: false,
       ),
       body: Column(
@@ -55,19 +108,66 @@ class ChatView extends GetView<ChatController> {
           Expanded(
             child: SizedBox(
               width: Get.width,
-              child: ListView(
-                children: const [
-                  ItemChat(
-                    isSender: true,
-                    message:
-                        'Assalamualaikum Wr. wb. \nSelamat Siang Bapak Permana',
-                  ),
-                  ItemChat(
-                    isSender: false,
-                    message:
-                        'Waalaikum Salaam Wr. Wb \nSelamat Siang Bapak Dadang',
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: controller.streamChat(chatId: chatId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.active) {
+                    var listChats = snapshot.data?.docs;
+                    // Jump to Last Chat
+                    Timer(const Duration(milliseconds: 100), () {
+                      debugPrint('CHAT VIEW');
+                      controller.scrollC.animateTo(
+                          controller.scrollC.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 100),
+                          curve: Curves.ease);
+                    });
+
+                    return ListView.builder(
+                      controller: controller.scrollC,
+                      itemCount: listChats?.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            (index == 0 ||
+                                    listChats?[index]['groupTime'] !=
+                                        listChats?[index - 1]['groupTime'])
+                                ? Column(
+                                    children: [
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                            color:
+                                                Colors.grey.withOpacity(0.05),
+                                            borderRadius:
+                                                BorderRadius.circular(5)),
+                                        child: Text(
+                                          listChats?[index]['groupTime'],
+                                          style: TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.blue[300]),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(),
+                            ItemChat(
+                              isSender: (listChats?[index]['pengirim'] ==
+                                  authC.user.value.email),
+                              message: listChats?[index]['pesan'],
+                              time: listChats?[index]['time'],
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
             ),
           ),
@@ -83,9 +183,18 @@ class ChatView extends GetView<ChatController> {
               children: [
                 Expanded(
                   child: TextField(
+                    autocorrect: false,
                     controller: controller.inputC,
                     focusNode: controller.focusNode,
+                    textInputAction: TextInputAction.done,
                     cursorColor: Colors.blue[300],
+                    onEditingComplete: () {
+                      controller.sendChat(
+                        email: authC.user.value.email!,
+                        argument: Get.arguments as Map<String, dynamic>,
+                        chat: controller.inputC.text,
+                      );
+                    },
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(vertical: 15),
                       prefixIcon: IconButton(
@@ -119,7 +228,11 @@ class ChatView extends GetView<ChatController> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(100),
                     onTap: () {
-                      controller.inputC.clear();
+                      controller.sendChat(
+                        email: authC.user.value.email!,
+                        argument: Get.arguments as Map<String, dynamic>,
+                        chat: controller.inputC.text,
+                      );
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(16),
@@ -191,7 +304,12 @@ class ChatView extends GetView<ChatController> {
 class ItemChat extends StatelessWidget {
   final bool isSender;
   final String message;
-  const ItemChat({super.key, required this.isSender, required this.message});
+  final String time;
+  const ItemChat(
+      {super.key,
+      required this.isSender,
+      required this.message,
+      required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -230,8 +348,8 @@ class ItemChat extends StatelessWidget {
             height: 5,
           ),
           Text(
-            '18:22 PM',
-            style: TextStyle(fontSize: 10, color: Colors.grey),
+            DateFormat.jm().format(DateTime.parse(time)),
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
         ],
       ),

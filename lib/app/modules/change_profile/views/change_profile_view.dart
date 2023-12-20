@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 
@@ -164,9 +166,66 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('no Image'),
+                    GetBuilder<ChangeProfileController>(builder: (c) {
+                      if (c.pickerImage != null) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(100),
+                                    image: DecorationImage(
+                                      image:
+                                          FileImage(File(c.pickerImage!.path)),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => controller.resetImage(),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.delete_outline_rounded),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextButton(
+                                onPressed: () {
+                                  controller
+                                      .uploadPhoto(uid: authC.user.value.uid!)
+                                      .then((photoUrl) {
+                                    if (photoUrl != null) {
+                                      authC.changePhotoProfile(
+                                          photoUrl: photoUrl);
+                                    }
+                                  });
+                                },
+                                child: const Text('Upload'))
+                          ],
+                        );
+                      }
+                      return const Text('no Image');
+                    }),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        controller.selectedImage();
+                      },
                       child: const Text('Choose file'),
                     )
                   ],
